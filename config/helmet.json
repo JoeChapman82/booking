@@ -1,0 +1,32 @@
+{
+  "contentSecurityPolicy": {
+    "directives": {
+      "defaultSrc": [
+        "'self'"
+      ],
+      "scriptSrc": [
+        "'self'",
+        "'unsafe-inline'",
+        "www.google-analytics.com"
+      ],
+      "imgSrc": [
+        "'self'",
+        "www.google-analytics.com"
+      ],
+      "fontSrc": [
+        "'self'",
+        "data: blob:"
+      ],
+      "styleSrc": [
+        "'self'",
+        "'unsafe-inline'"
+      ]
+    },
+    "reportOnly": false,
+    "setAllHeaders": true,
+    "disableAndroid": false
+  },
+  "frameguard": {
+    "action": "deny"
+  }
+}

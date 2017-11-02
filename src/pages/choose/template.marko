@@ -1,0 +1,56 @@
+$ const i18n = out.stream.req.t;
+
+<include('../../common/layout.marko') page-title="${i18n('choose:heading')} - ${i18n('app:serviceName')}">
+
+  <@content>
+    <h1.heading-xlarge>
+      <i18n-message key="choose:heading"/>
+    </h1>
+
+    <p class="lede">This system is only for use by people based in Leeds One.<br/> All meetings must have someone in Leeds One attending</p>
+
+    <for(location in data.locations)>
+      <h2.heading-medium>
+        <i18n-message key="choose:floorplate" name=location.name/>
+      </h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">
+              <i18n-message key="choose:roomName"/>
+            </th>
+            <th scope="col">
+              <i18n-message key="choose:equipment"/>
+            </th>
+            <th.numeric scope="col">
+              <i18n-message key="choose:sittingCapacity"/>
+            </th>
+            <th.numeric scope="col">
+              <i18n-message key="choose:standingCapacity"/>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr for(room in location.rooms)>
+            <td>
+              <a href="/book/${room.id}">${room.name}</a>
+            </td>
+            <td>
+              <for (feature in room.features | separator=', ')>
+                ${feature.description}
+              </for>
+            </td>
+            <td.numeric>
+              ${room.sittingCapacity}
+            </td>
+            <td.numeric>
+              ${room.standingCapacity}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </for>
+  </@content>
+
+</include>

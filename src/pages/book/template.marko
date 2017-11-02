@@ -1,0 +1,443 @@
+import {addDays, subDays, differenceInDays} from 'date-fns';
+
+static function isTodayOrTheFuture(date) {
+  return differenceInDays(date, new Date()) >= 0;
+}
+
+static function isOverTwoMonths(date) {
+    // var isOverTwoMonths = false;
+    // const today = new Date();
+    // let twoMonthDate = new Date(today);
+    // twoMonthDate.setDate(twoMonthDate.getDate() + 60);
+    // if(date > twoMonthDate) {
+    //     isOverTwoMonths = true;
+    // }
+    // return isOverTwoMonths;
+    return differenceInDays(date, new Date()) >= 60;
+}
+
+$ {
+  const i18n = out.stream.req.t;
+  const errors = data.errors || false;
+  const values = data.values || false;
+  const prev = subDays(data.date, 1);
+  const next = addDays(data.date, 1);
+  const pageTitle = i18n('book:title', {'floor-plate': data.room.location.name, 'room-name': data.room.name}) + '-' + i18n('app:serviceName');
+}
+
+<include("../../common/layout.marko") page-title=pageTitle ga-page=data.gaPage>
+
+  <@content>
+    <a.link-back href="/choose-a-room">
+      <i18n-message key="choose:heading"/>
+    </a>
+
+    <notify-success if(data.bookingId) message=i18n('book:roomBooked')>
+    <p><strong>Details of the booking and how to cancel have been emailed to you.</strong></p>
+    <p>If you require visitors to be booked on site or VC equipment, you will need to do this separately.</p>
+      <form method="post">
+        <input type="hidden" name="unbook" value="true"/>
+        <input type="hidden" name="bookingId" value=data.bookingId/>
+        <button.button type="submit">
+          <i18n-message key="book:undo"/>
+        </button>
+      </form>
+    </notify-success>
+    <notify-success else-if(data.unbooked) message=i18n('book:roomUnbooked')/>
+
+    <h1.heading-xlarge.no-margin-bottom>
+      <span.heading-secondary>
+        ${data.room.location.name}
+      </span>
+      ${data.room.name}
+    </h1>
+
+
+    <p>
+      <i18n-message key="book:features" strong-start="<strong>"
+        strong-end="</strong>" features=data.room.features.map(e => e.description).join(', ')/>
+
+        <i18n-message key="book:sitting" strong-start="<strong>"
+          strong-end="</strong>" sittingCapacity=data.room.sittingCapacity/>
+
+          <i18n-message key="book:standing" strong-start="<strong>"
+            strong-end="</strong>" standingCapacity=data.room.standingCapacity/>
+    </p>
+
+
+    <div.grid-row>
+      <div.column-two-thirds>
+
+
+
+        <form.change-date>
+          <gov-date-input name="date" legend=i18n('book:dateForm.date.legend')
+            value-day=values.dateDay value-month=values.dateMonth
+            value-year=values.dateYear maxyear="9999"
+            error=errors.date suffix="camel"/>
+
+          <button.button type="submit">
+            <i18n-message key="book:dateForm.submit"/>
+          </button>
+        </form>
+
+        <if(isOverTwoMonths(data.date))>
+            <p>Any booking more than 2 months in advance will be provisional while the trial is running.</p>
+        </if>
+
+        <pagination prev-url="?dateDay=${prev.getDate()}&dateMonth=${prev.getMonth() + 1}&dateYear=${prev.getFullYear()}"
+          next-url="?dateDay=${next.getDate()}&dateMonth=${next.getMonth() + 1}&dateYear=${next.getFullYear()}"
+          prev-text=i18n('date:dayMonth', {day: prev.getDate(), month: prev.getMonth()})
+          next-text=i18n('date:dayMonth', {day: next.getDate(), month: next.getMonth()})/>
+
+        <calendar-view bookings=data.room.bookings date=data.date/>
+
+      </div>
+
+      <div class="column-third" if(isTodayOrTheFuture(data.date))>
+        <form method="post">
+          <h2.heading-medium>
+            <i18n-message key="book:bookForm.heading" room-name=data.room.name/>
+          </h2>
+          <p.lede>
+            <i18n-message key="date:dayMonthYear" day=data.date.getDate()
+              month=data.date.getMonth() year=data.date.getFullYear()/>
+          </p>
+
+          <gov-input name="description" label=i18n('book:bookForm.description.label')
+            error=errors.description value=values.description/>
+          <gov-input name="name" label=i18n('book:bookForm.name.label')
+            error=errors.name value=values.name/>
+          <gov-input name="email" label=i18n('book:bookForm.email.label')
+            error=errors.email value=values.email/>
+
+          <time-select legend=i18n('book:bookForm.from.legend') name="from"
+            error=errors.from value-hours=values.fromHours value-minutes=values.fromMinutes/>
+          <time-select legend=i18n('book:bookForm.until.legend') name="until"
+            error=errors.until value-hours=values.untilHours value-minutes=values.untilMinutes/>
+
+          <button.button type="submit">
+            <i18n-message key="book:bookForm.submit"/>
+          </button>
+        </form>
+      </div>
+    </div>
+    <script>
+
+    // Polyfills
+
+    if (!Array.prototype.forEach) {
+      Array.prototype.forEach = function(callback/*, thisArg*/) {
+        var T, k;
+        if (this == null) {
+          throw new TypeError('this is null or not defined');
+        }
+        var O = Object(this);
+        var len = O.length >>> 0;
+        if (typeof callback !== 'function') {
+          throw new TypeError(callback + ' is not a function');
+        }
+        if (arguments.length > 1) {
+          T = arguments[1];
+        }
+        k = 0;
+        while (k < len) {
+          var kValue;
+          if (k in O) {
+            kValue = O[k];
+            callback.call(T, kValue, k, O);
+          }
+          k++;
+        }
+      };
+    }
+
+    if (!NodeList.prototype.forEach) {
+        NodeList.prototype.forEach = Array.prototype.forEach;
+    }
+
+    // Class List polyfill
+
+    /*
+     * classList.js: Cross-browser full element.classList implementation.
+     * 2014-07-23
+     *
+     * By Eli Grey, http://eligrey.com
+     * Public Domain.
+     * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+     */
+
+    /*global self, document, DOMException */
+
+    /*! @source http://purl.eligrey.com/github/classList.js/blob/master/classList.js*/
+
+    if ("document" in self) {
+
+    // Full polyfill for browsers with no classList support
+    if (!("classList" in document.createElement("_"))) {
+
+    (function (view) {
+
+    "use strict";
+
+    if (!('Element' in view)) return;
+
+    var
+        classListProp = "classList"
+      , protoProp = "prototype"
+      , elemCtrProto = view.Element[protoProp]
+      , objCtr = Object
+      , strTrim = String[protoProp].trim || function () {
+        return this.replace(/^\s+|\s+$/g, "");
+      }
+      , arrIndexOf = Array[protoProp].indexOf || function (item) {
+        var
+            i = 0
+          , len = this.length
+        ;
+        for (; i < len; i++) {
+          if (i in this && this[i] === item) {
+            return i;
+          }
+        }
+        return -1;
+      }
+      // Vendors: please allow content code to instantiate DOMExceptions
+      , DOMEx = function (type, message) {
+        this.name = type;
+        this.code = DOMException[type];
+        this.message = message;
+      }
+      , checkTokenAndGetIndex = function (classList, token) {
+        if (token === "") {
+          throw new DOMEx(
+              "SYNTAX_ERR"
+            , "An invalid or illegal string was specified"
+          );
+        }
+        if (/\s/.test(token)) {
+          throw new DOMEx(
+              "INVALID_CHARACTER_ERR"
+            , "String contains an invalid character"
+          );
+        }
+        return arrIndexOf.call(classList, token);
+      }
+      , ClassList = function (elem) {
+        var
+            trimmedClasses = strTrim.call(elem.getAttribute("class") || "")
+          , classes = trimmedClasses ? trimmedClasses.split(/\s+/) : []
+          , i = 0
+          , len = classes.length
+        ;
+        for (; i < len; i++) {
+          this.push(classes[i]);
+        }
+        this._updateClassName = function () {
+          elem.setAttribute("class", this.toString());
+        };
+      }
+      , classListProto = ClassList[protoProp] = []
+      , classListGetter = function () {
+        return new ClassList(this);
+      }
+    ;
+    // Most DOMException implementations don't allow calling DOMException's toString()
+    // on non-DOMExceptions. Error's toString() is sufficient here.
+    DOMEx[protoProp] = Error[protoProp];
+    classListProto.item = function (i) {
+      return this[i] || null;
+    };
+    classListProto.contains = function (token) {
+      token += "";
+      return checkTokenAndGetIndex(this, token) !== -1;
+    };
+    classListProto.add = function () {
+      var
+          tokens = arguments
+        , i = 0
+        , l = tokens.length
+        , token
+        , updated = false
+      ;
+      do {
+        token = tokens[i] + "";
+        if (checkTokenAndGetIndex(this, token) === -1) {
+          this.push(token);
+          updated = true;
+        }
+      }
+      while (++i < l);
+
+      if (updated) {
+        this._updateClassName();
+      }
+    };
+    classListProto.remove = function () {
+      var
+          tokens = arguments
+        , i = 0
+        , l = tokens.length
+        , token
+        , updated = false
+        , index
+      ;
+      do {
+        token = tokens[i] + "";
+        index = checkTokenAndGetIndex(this, token);
+        while (index !== -1) {
+          this.splice(index, 1);
+          updated = true;
+          index = checkTokenAndGetIndex(this, token);
+        }
+      }
+      while (++i < l);
+
+      if (updated) {
+        this._updateClassName();
+      }
+    };
+    classListProto.toggle = function (token, force) {
+      token += "";
+
+      var
+          result = this.contains(token)
+        , method = result ?
+          force !== true && "remove"
+        :
+          force !== false && "add"
+      ;
+
+      if (method) {
+        this[method](token);
+      }
+
+      if (force === true || force === false) {
+        return force;
+      } else {
+        return !result;
+      }
+    };
+    classListProto.toString = function () {
+      return this.join(" ");
+    };
+
+    if (objCtr.defineProperty) {
+      var classListPropDesc = {
+          get: classListGetter
+        , enumerable: true
+        , configurable: true
+      };
+      try {
+        objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
+      } catch (ex) { // IE 8 doesn't support enumerable:true
+        if (ex.number === -0x7FF5EC54) {
+          classListPropDesc.enumerable = false;
+          objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
+        }
+      }
+    } else if (objCtr[protoProp].__defineGetter__) {
+      elemCtrProto.__defineGetter__(classListProp, classListGetter);
+    }
+
+    }(self));
+
+    } else {
+    // There is full or partial native classList support, so just check if we need
+    // to normalize the add/remove and toggle APIs.
+
+    (function () {
+      "use strict";
+
+      var testElement = document.createElement("_");
+
+      testElement.classList.add("c1", "c2");
+
+      // Polyfill for IE 10/11 and Firefox <26, where classList.add and
+      // classList.remove exist but support only one argument at a time.
+      if (!testElement.classList.contains("c2")) {
+        var createMethod = function(method) {
+          var original = DOMTokenList.prototype[method];
+
+          DOMTokenList.prototype[method] = function(token) {
+            var i, len = arguments.length;
+
+            for (i = 0; i < len; i++) {
+              token = arguments[i];
+              original.call(this, token);
+            }
+          };
+        };
+        createMethod('add');
+        createMethod('remove');
+      }
+
+      testElement.classList.toggle("c3", false);
+
+      // Polyfill for IE 10 and Firefox <24, where classList.toggle does not
+      // support the second argument.
+      if (testElement.classList.contains("c3")) {
+        var _toggle = DOMTokenList.prototype.toggle;
+
+        DOMTokenList.prototype.toggle = function(token, force) {
+          if (1 in arguments && !this.contains(token) === !force) {
+            return force;
+          } else {
+            return _toggle.call(this, token);
+          }
+        };
+
+      }
+
+      testElement = null;
+    }());
+
+    }
+
+    }
+
+
+    // Actual Code
+
+        function pad(n) {
+            return (n < 10) ? ("0" + n) : n;
+            }
+
+        var isClicking = false;
+        document.querySelectorAll('#input-date-day, #input-date-month, #input-date-year').forEach(function(input) {
+            input.addEventListener('blur', function() {
+                this.parentNode.parentNode.parentNode.parentNode.parentNode.submit();
+            })
+        });
+
+        document.querySelectorAll('.time').forEach(function(time) {
+            time.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.time').forEach(function(innerTime) {
+                innerTime.classList.remove('provisional-date')
+            });
+                this.classList.toggle('provisional-date');
+                isClicking = true;
+            });
+            time.addEventListener('mouseup', function() {
+                isClicking = false;
+                var selectedDates = document.querySelectorAll('.provisional-date');
+                var firstSelectedDate = selectedDates[0].getAttribute('data-time').split(':');
+                var lastSelectedDate = selectedDates.length === 1 ? selectedDates[0].getAttribute('data-time').split(':') : selectedDates[selectedDates.length - 1].getAttribute('data-time').split(':');
+                var inputs = document.querySelectorAll('#hours, #minutes');
+                inputs[0].value = firstSelectedDate[0];
+                inputs[1].value = firstSelectedDate[1];
+                inputs[2].value = lastSelectedDate[1] === '30' ? pad(parseInt(lastSelectedDate[0]) + 1).toString() : lastSelectedDate[0];
+                inputs[3].value = lastSelectedDate[1] === '30' ? '00' : '30';
+            });
+            time.addEventListener('mouseover', function() {
+                if(isClicking === true) {
+                this.classList.add('provisional-date');
+                }
+            });
+
+        })
+    </script>
+  </@content>
+
+</include>
