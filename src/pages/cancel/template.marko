@@ -1,8 +1,8 @@
 import formatTime from '../../utils/format-time';
 
 $ const i18n = out.stream.req.t;
-$ const start = new Date(new Date(data.start).getTime() - 3600000);
-$ const end = new Date(new Date(data.end).getTime() - 3600000);
+$ const start = new Date(data.start);
+$ const end = new Date(data.end);
 $ const dateObj = {day: start.getDate(), month: start.getMonth(), year: start.getFullYear()};
 
 <include("../../common/layout.marko") page-title="${i18n('cancel:heading')} - ${i18n('app:serviceName')}">

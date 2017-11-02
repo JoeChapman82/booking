@@ -108,9 +108,7 @@ function post(req, res, next) {
 
         const roomName = room.name;
         const start = new Date(booking.start);
-        start.setHours(start.getHours() - 1);
         const end = new Date(booking.end);
-        end.setHours(end.getHours() - 1);
         const bookingDate = req.t('date:dayMonth', {day: start.getDate(), month: start.getMonth()});
         const time = `${formatTime(start)} - ${formatTime(end)}`;
         const url = `${req.protocol}://${req.get('host')}/cancel/${bookingId}`;
