@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 // Page routes
-app.get('*', res.redirect('https://leeds-one-room-booking-system.herokuapp.com'));
+app.get('*', (req, res) => res.redirect('https://leeds-one-room-booking-system.herokuapp.com'));
 // app.use('/choose-a-room', require('./src/pages/choose'));
 // app.use('/cancel', require('./src/pages/cancel'));
 // app.use('/cancelled', require('./src/pages/cancelled'));
